@@ -18,6 +18,17 @@
 #include "vrambuf.h"
 //#link "vrambuf.c"
 
+// Wait frame to prevent text break or flickering
+// A wait frame does 5 frames per call so...
+// 50 frames = 1 sec
+void ppuPause(){
+  ppu_wait_frame();
+  ppu_wait_frame();
+  ppu_wait_frame();
+  ppu_wait_frame();
+  ppu_wait_frame();
+}
+
 /*{pal:"nes",layout:"nes"}*/
 const char PALETTE[32] = { 
   0x03,			// screen color
