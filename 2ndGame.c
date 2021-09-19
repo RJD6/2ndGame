@@ -56,8 +56,9 @@ const unsigned char name[]={\
 // Make metasprite instances
 DEF_METASPRITE_2x2(majorEnemy, 0xe0, 0); //$07; actors[0]
 DEF_METASPRITE_2x2(minorEnemy, 0xdc, 0); //$06; actors[1]
+DEF_METASPRITE_2x2(player, 0xd8, 0); // $05; actors[2]
 
-#define NUM_ACTORS 2
+#define NUM_ACTORS 3
 // Actors' x/y positions
 byte actor_x[NUM_ACTORS];
 byte actor_y[NUM_ACTORS];
@@ -67,13 +68,23 @@ sbyte actor_dy[NUM_ACTORS];
 
 // Place actors on screen
 void setupActors(){
+  // Major Enemy
   actor_x[0] = 128;
   actor_y[0] = 10;
   actor_dx[0] = 1;
+  actor_dy[0] = 0;
   
+  // Minor Enemy
   actor_x[1] = 128;
-  actor_y[1] =30;
+  actor_y[1] = 30;
   actor_dx[1] = 1;
+  actor_dy[1] = 0;
+  
+  // Player
+  actor_x[2] = 128;
+  actor_y[2] = 190;
+  actor_dx[2] = 0;
+  actor_dy[2] = 0;
 };
 void main(void)
 {
@@ -89,9 +100,13 @@ void main(void)
       if(i==0){
         oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, majorEnemy);
       }
-      if(i==1){
+      else if(i==1){
         oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, minorEnemy);
       }
+      else if(i==2){
+        oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, player);
+      }
+      
       actor_x[i] += actor_dx[i];
       actor_y[i] += actor_dy[i];
     }
@@ -99,6 +114,6 @@ void main(void)
     // if we haven't wrapped oam_id around to 0
     if (oam_id!=0) oam_hide_rest(oam_id);
     // wait for next frame
-    ppu_wait_frame();
+    ppu_wait_nmi();
   }
 }
