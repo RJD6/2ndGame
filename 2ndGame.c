@@ -80,19 +80,19 @@ sbyte actor_dy[NUM_ACTOR_TYPES];
 // Place actors on screen
 void setupActors(){
   // Major Enemy
-  actor_x[0] = 128;
+  actor_x[0] = 80;
   actor_y[0] = 10;
   actor_dx[0] = 1;
   actor_dy[0] = 0;
   
   // Minor Enemy
-  actor_x[1] = 70;
+  actor_x[1] = 80;
   actor_y[1] = 30;
   actor_dx[1] = 1;
   actor_dy[1] = 0;
   
   // Player
-  actor_x[2] = 128;
+  actor_x[2] = 120;
   actor_y[2] = 190;
   actor_dx[2] = 0;
   actor_dy[2] = 0;
@@ -112,21 +112,19 @@ void main(void)
     actor_x[i] += actor_dx[i];
     actor_y[i] += actor_dy[i];
       }
-    // Track positions
-    for(i=0; i<7; i++){
-      if(i==0 || i==1 || i==2){
+    // Track enemy positions
+    for(i=0; i<9; i++){
+      if(i==0 || i==1 || i==2 || i==3){
         oam_id = oam_meta_spr(actor_x[0] + (20 * i), actor_y[0], oam_id, majorEnemy);
       }
-      else if(i==3 || i==4 || i==5){
-        oam_id = oam_meta_spr(actor_x[1] + (20 * i-3), actor_y[1], oam_id, minorEnemy);
+      else if(i==4 || i==5 || i==6 || i==7){
+        oam_id = oam_meta_spr(actor_x[1] + (20 * (i-4)), actor_y[1], oam_id, minorEnemy);
       }
-      else if(i==6){
+      else if(i==8){
         oam_id = oam_meta_spr(actor_x[2], actor_y[2], oam_id, player);
       }
     }
-    // hide rest of sprites
-    // if we haven't wrapped oam_id around to 0
-    if (oam_id!=0) oam_hide_rest(oam_id);
+    
     // wait for next frame
     ppu_wait_nmi();
   }
