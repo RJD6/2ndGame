@@ -31,7 +31,7 @@ void ppuPause(){
 
 /*{pal:"nes",layout:"nes"}*/
 const char PALETTE[32] = { 
-  0x03,			// screen color
+  0x0D,			// screen color
 
   0x1E,0x30,0x2D,0x00,	// background palette 0
   0x1C,0x20,0x2C,0x00,	// background palette 1
@@ -69,13 +69,13 @@ DEF_METASPRITE_2x2(majorEnemy, 0xe0, 0); //$07; actors[0]
 DEF_METASPRITE_2x2(minorEnemy, 0xdc, 0); //$06; actors[1]
 DEF_METASPRITE_2x2(player, 0xd8, 0); // $05; actors[2]
 
-#define NUM_ACTORS 3
+#define NUM_ACTOR_TYPES 3
 // Actors' x/y positions
-byte actor_x[NUM_ACTORS];
-byte actor_y[NUM_ACTORS];
+byte actor_x[NUM_ACTOR_TYPES];
+byte actor_y[NUM_ACTOR_TYPES];
 // Actors' delta x and delta y
-sbyte actor_dx[NUM_ACTORS];
-sbyte actor_dy[NUM_ACTORS];
+sbyte actor_dx[NUM_ACTOR_TYPES];
+sbyte actor_dy[NUM_ACTOR_TYPES];
 
 // Place actors on screen
 void setupActors(){
@@ -86,7 +86,7 @@ void setupActors(){
   actor_dy[0] = 0;
   
   // Minor Enemy
-  actor_x[1] = 128;
+  actor_x[1] = 70;
   actor_y[1] = 30;
   actor_dx[1] = 1;
   actor_dy[1] = 0;
@@ -107,19 +107,22 @@ void main(void)
   
   // infinite loop
   while(1) {
-    for(i=0; i<NUM_ACTORS; i++){
-      if(i==0){
-        oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, majorEnemy);
+    // Track movements for each actor type
+    for(i=0; i<2; i++){
+    actor_x[i] += actor_dx[i];
+    actor_y[i] += actor_dy[i];
       }
-      else if(i==1){
-        oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, minorEnemy);
+    // Track positions
+    for(i=0; i<7; i++){
+      if(i==0 || i==1 || i==2){
+        oam_id = oam_meta_spr(actor_x[0] + (20 * i), actor_y[0], oam_id, majorEnemy);
       }
-      else if(i==2){
-        oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, player);
+      else if(i==3 || i==4 || i==5){
+        oam_id = oam_meta_spr(actor_x[1] + (20 * i-3), actor_y[1], oam_id, minorEnemy);
       }
-      
-      actor_x[i] += actor_dx[i];
-      actor_y[i] += actor_dy[i];
+      else if(i==6){
+        oam_id = oam_meta_spr(actor_x[2], actor_y[2], oam_id, player);
+      }
     }
     // hide rest of sprites
     // if we haven't wrapped oam_id around to 0
