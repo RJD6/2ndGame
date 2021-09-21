@@ -101,9 +101,10 @@ void main(void)
 {
   char i; // Actor Index
   char oam_id; // Sprite ID
+  // char pad;	// Controller flags
   
-  setup_graphics();
-  setupActors();
+  setup_graphics(); // Setup graphics
+  setupActors(); // Setup Actors
   
   // infinite loop
   while(1) {
@@ -111,7 +112,7 @@ void main(void)
     for(i=0; i<2; i++){
     actor_x[i] += actor_dx[i];
     actor_y[i] += actor_dy[i];
-      }
+    }
     // Track enemy positions
     for(i=0; i<9; i++){
       if(i==0 || i==1 || i==2 || i==3){
@@ -125,7 +126,39 @@ void main(void)
       }
     }
     
-    // wait for next frame
+    // wait for next frame (sprites)
     ppu_wait_nmi();
   }
+  
+  // loop forever
+  /*while (1) {
+    // start with OAMid/sprite 0
+    oam_id = 0;
+    // set player 0/1 velocity based on controller
+    for (i=0; i<2; i++) {
+      // poll controller i (0-1)
+      pad = pad_poll(i);
+      // move actor[i] left/right
+      if (pad&PAD_LEFT && actor_x[i]>0) actor_dx[i]=-2;
+      else if (pad&PAD_RIGHT && actor_x[i]<240) actor_dx[i]=2;
+      else actor_dx[i]=0;
+      // move actor[i] up/down
+      if (pad&PAD_UP && actor_y[i]>0) actor_dy[i]=-2;
+      else if (pad&PAD_DOWN && actor_y[i]<212) actor_dy[i]=2;
+      else actor_dy[i]=0;
+    }
+    
+    // draw and move all actors
+    for (i=0; i<NUM_ACTORS; i++) {
+      byte runseq = actor_x[i] & 7;
+      if (actor_dx[i] >= 0)
+        runseq += 8;
+      oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRunSeq[runseq]);
+      actor_x[i] += actor_dx[i];
+      actor_y[i] += actor_dy[i];
+    }
+    // hide rest of sprites
+    // if we haven't wrapped oam_id around to 0
+    if (oam_id!=0) oam_hide_rest(oam_id);
+    */
 }
