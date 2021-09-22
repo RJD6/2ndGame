@@ -101,19 +101,29 @@ void main(void)
 {
   char i; // Actor Index
   char oam_id; // Sprite ID
-  // char pad;	// Controller flags
   
   setup_graphics(); // Setup graphics
   setupActors(); // Setup Actors
   
   // infinite loop
   while(1) {
+    // Player Movement
+    char pad = pad_poll(0);
+    if (pad & PAD_LEFT && actor_x[2]>10){
+      actor_dx[2]=-2;
+    }
+    else if (pad & PAD_RIGHT && actor_x[2]<230){
+      actor_dx[2]=2;
+    }
+    else{
+      actor_dx[2]=0;
+    }
     // Track movements for each actor type
-    for(i=0; i<2; i++){
+    for(i=0; i<3; i++){
     actor_x[i] += actor_dx[i];
     actor_y[i] += actor_dy[i];
     }
-    // Track enemy positions
+    // Track actor positions
     for(i=0; i<9; i++){
       if(i==0 || i==1 || i==2 || i==3){
         oam_id = oam_meta_spr(actor_x[0] + (20 * i), actor_y[0], oam_id, majorEnemy);
@@ -122,6 +132,7 @@ void main(void)
         oam_id = oam_meta_spr(actor_x[1] + (20 * (i-4)), actor_y[1], oam_id, minorEnemy);
       }
       else if(i==8){
+        // Player position and movement
         oam_id = oam_meta_spr(actor_x[2], actor_y[2], oam_id, player);
       }
     }
