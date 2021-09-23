@@ -68,8 +68,9 @@ const unsigned char name[]={\
 DEF_METASPRITE_2x2(majorEnemy, 0xe0, 0); //$07; actors[0]
 DEF_METASPRITE_2x2(minorEnemy, 0xdc, 0); //$06; actors[1]
 DEF_METASPRITE_2x2(player, 0xd8, 0); // $05; actors[2]
+DEF_METASPRITE_2x2(bullet, 0xe4, 0); // $08
 
-#define NUM_ACTOR_TYPES 3
+#define NUM_ACTOR_TYPES 4
 // Actors' x/y positions
 byte actor_x[NUM_ACTOR_TYPES];
 byte actor_y[NUM_ACTOR_TYPES];
@@ -96,9 +97,16 @@ void setupActors(){
   actor_y[2] = 190;
   actor_dx[2] = 0;
   actor_dy[2] = 0;
+  
+  // Bullets
+  actor_x[3] = 0;
+  actor_y[3] = 0;
+  actor_dx[3] = 0;
+  actor_dy[3] = -4;
 };
 void main(void)
 {
+  bool bullet_exists = false;
   char i; // Actor Index
   char oam_id; // Sprite ID
   
@@ -118,6 +126,23 @@ void main(void)
     else{
       actor_dx[2]=0;
     }
+    // Player Attack
+    if (pad & PAD_A && !bullet_exists){
+      // Bullet must spawn in front of player
+      actor_x[3] = actor_x[2];
+      actor_y[3] = actor_y[2] - 12;
+      oam_id = oam_meta_spr(actor_x[3], actor_y[3], oam_id, bullet);
+      bullet_exists = true;
+    }
+    if (bullet_exists){
+      // Bullet must fly forward
+      actor_x[3] += actor_dx[3];
+      actor_y[3] += actor_dy[3];
+      oam_id = oam_meta_spr(actor_x[3], actor_y[3], oam_id, bullet);
+      if (actor_y[3] < 1 || actor_y[3] > 190){
+        bullet_exists = false;
+      }
+    }
     // Track movements for each actor type
     for(i=0; i<3; i++){
     actor_x[i] += actor_dx[i];
@@ -126,7 +151,7 @@ void main(void)
     // Track actor positions
     for(i=0; i<9; i++){
       if(i==0 || i==1 || i==2 || i==3){
-        oam_id = oam_meta_spr(actor_x[0] + (20 * i), actor_y[0], oam_id, majorEnemy);
+        oam_id = oam_meta_spr((actor_x[0]) + (20 * i), actor_y[0], oam_id, majorEnemy);
       }
       else if(i==4 || i==5 || i==6 || i==7){
         oam_id = oam_meta_spr(actor_x[1] + (20 * (i-4)), actor_y[1], oam_id, minorEnemy);
