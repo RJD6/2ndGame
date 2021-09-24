@@ -91,9 +91,6 @@ void main(void)
   struct Actor player;
   struct Actor bullet_player;
   
-  oam_clear();
-
-  
   // Establish Major Enemies
   for(i=0; i<3; i++){
     strcpy(major_enemies[i].label, "Major");
