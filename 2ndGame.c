@@ -90,12 +90,14 @@ void main(void)
   struct Actor minor_enemies[4];
   struct Actor player;
   struct Actor bullet_player;
+  
+  oam_clear();
 
   
   // Establish Major Enemies
-  for(i=0; i<4; i++){
+  for(i=0; i<3; i++){
     strcpy(major_enemies[i].label, "Major");
-    major_enemies[i].x = 80 + (20 * i);
+    major_enemies[i].x = 80 + (25 * i);
     major_enemies[i].y = 10;
     major_enemies[i].dx = 1;
     major_enemies[i].dy = 0;
@@ -104,9 +106,9 @@ void main(void)
   }
   
   // Establish Minor Enemies
-  for(i=0; i<4; i++){
+  for(i=0; i<3; i++){
     strcpy(minor_enemies[i].label, "Minor");
-    minor_enemies[i].x = 80 + (20 * i);
+    minor_enemies[i].x = 80 + (25 * i);
     minor_enemies[i].y = 30;
     minor_enemies[i].dx = 1;
     minor_enemies[i].dy = 0;
@@ -128,17 +130,18 @@ void main(void)
   bullet_player.x = 0;
   bullet_player.y = 0;
   bullet_player.dx = 0;
-  bullet_player.dy = -4;
+  bullet_player.dy = -3;
   
   setup_graphics(); // Setup graphics
   
   // infinite loop
   while(1) {
     char pad = pad_poll(0);
+    oam_id = 0;
     
     // Track movements for each actor type
     // Major and Minor Enemies
-    for(i=0; i<4; i++){
+    for(i=0; i<3; i++){
       major_enemies[i].x += major_enemies[i].dx;
       major_enemies[i].y += major_enemies[i].dy;
       minor_enemies[i].x += minor_enemies[i].dx;
@@ -147,25 +150,41 @@ void main(void)
     // Player
     if (pad & PAD_LEFT && player.x>10){
       player.dx=-2;
-      
+      oam_clear();
     }
     else if (pad & PAD_RIGHT && player.x<230){
       player.dx=2;
+      oam_clear();
     }
     else{
       player.dx=0;
     }
+    
     // Player Attack
     if (pad & PAD_A && !bullet_exists){
       // Bullet must spawn in front of player
       bullet_player.x = player.x;
       bullet_player.y = player.y - 12;
-      oam_id = oam_meta_spr(bullet_player.x, bullet_player.y, oam_id, bullet);
       bullet_exists = true;
     }
+    // If the player's bullet exists...
     if (bullet_exists){
-      // Bullet must fly forward
-      bullet_player.x += bullet_player.dx;
+      // Check for enemy collision
+      for(i=0; i<3; i++){
+        if(major_enemies[i].is_alive && abs(bullet_player.x - major_enemies[i].x) < 8 && abs(bullet_player.y - major_enemies[i].y) < 8){
+          major_enemies[i].is_alive = false;
+          bullet_exists = false;
+          oam_clear();
+          break;
+        }
+          if(minor_enemies[i].is_alive && abs(bullet_player.x - minor_enemies[i].x) < 8 && abs(bullet_player.y - minor_enemies[i].y) < 8){
+          minor_enemies[i].is_alive = false;
+          bullet_exists = false;
+          oam_clear();
+          break;
+        }
+      }
+      // And the bullet must fly forward
       bullet_player.y += bullet_player.dy;
       oam_id = oam_meta_spr(bullet_player.x, bullet_player.y, oam_id, bullet);
       if (bullet_player.y < 1 || bullet_player.y > 190){
@@ -173,7 +192,7 @@ void main(void)
       }
     }
     
-    // Track actor positions
+    // Render actor positions
     // Major and Minor Enemies
     for(i=0; i<4; i++){
       if(major_enemies[i].is_alive){
@@ -186,10 +205,8 @@ void main(void)
     // Player
     if(player.is_alive){
       player.x += player.dx;
-      player.y += player.dy;
       oam_id = oam_meta_spr(player.x, player.y, oam_id, Player);
     }
-    
     // wait for next frame (sprites)
     ppu_wait_nmi();
   }
