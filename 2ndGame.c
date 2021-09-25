@@ -241,7 +241,18 @@ void main(void)
         minor_enemies[i].dx = 0;
         minor_enemies[i].dy = 0;
       }
+      
+      for(i=0; i<50; i++) {
+        ppu_wait_frame();
+      }
+      
+      ppu_wait_nmi();
+      
+      // write text to name table
+      vram_adr(NTADR_A(11,11));		// set address
+      vram_write("Game Over!", 10);	// write bytes to video RAM
     }
+    
     // wait for next frame (sprites)
     ppu_wait_nmi();
   }
