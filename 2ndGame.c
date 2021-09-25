@@ -29,17 +29,6 @@ struct Actor{
   byte lives; // How many lives does it have?
 };
 
-// Wait frame to prevent text break or flickering
-// A wait frame does 5 frames per call so...
-// 50 frames = 1 sec
-void ppuPause(){
-  ppu_wait_frame();
-  ppu_wait_frame();
-  ppu_wait_frame();
-  ppu_wait_frame();
-  ppu_wait_frame();
-}
-
 /*{pal:"nes",layout:"nes"}*/
 const char PALETTE[32] = { 
   0x0D,			// screen color
@@ -92,9 +81,9 @@ void main(void)
   struct Actor bullet_player;
   
   // Establish Major Enemies
-  for(i=0; i<3; i++){
+  for(i=0; i<2; i++){
     strcpy(major_enemies[i].label, "Major");
-    major_enemies[i].x = 80 + (25 * i);
+    major_enemies[i].x = 70 + (50 * i);
     major_enemies[i].y = 10;
     major_enemies[i].dx = 1;
     major_enemies[i].dy = 0;
@@ -103,9 +92,9 @@ void main(void)
   }
   
   // Establish Minor Enemies
-  for(i=0; i<3; i++){
+  for(i=0; i<2; i++){
     strcpy(minor_enemies[i].label, "Minor");
-    minor_enemies[i].x = 80 + (25 * i);
+    minor_enemies[i].x = 70 + (50 * i);
     minor_enemies[i].y = 30;
     minor_enemies[i].dx = 1;
     minor_enemies[i].dy = 0;
@@ -127,7 +116,7 @@ void main(void)
   bullet_player.x = 0;
   bullet_player.y = 0;
   bullet_player.dx = 0;
-  bullet_player.dy = -3;
+  bullet_player.dy = -4;
   
   setup_graphics(); // Setup graphics
   
@@ -137,10 +126,30 @@ void main(void)
     oam_id = 0;
     
     // Track movements for each actor type
-    // Major and Minor Enemies
-    for(i=0; i<3; i++){
+    // Major Enemies
+    for(i=0; i<2; i++){
+      if(major_enemies[i].x > 220){ // Major enemies lower slower, but speed up on dx.
+        major_enemies[i].y += 15;
+        major_enemies[i].dx++;
+        major_enemies[i].dx = -major_enemies[i].dx; 
+      }
+      else if(major_enemies[i].x < 10){
+        major_enemies[i].y += 15;
+        major_enemies[i].dx = -major_enemies[i].dx;
+      }
       major_enemies[i].x += major_enemies[i].dx;
       major_enemies[i].y += major_enemies[i].dy;
+    }
+    // Minor Enemies
+    for(i=0; i<2; i++){
+      if(minor_enemies[i].x > 220){ // Minor enemies lower faster, but do not speed up on dx.
+        minor_enemies[i].y += 40;
+        minor_enemies[i].dx = -minor_enemies[i].dx;
+      }
+      else if(minor_enemies[i].x < 10){
+        minor_enemies[i].y += 40;
+        minor_enemies[i].dx = -minor_enemies[i].dx;
+      }
       minor_enemies[i].x += minor_enemies[i].dx;
       minor_enemies[i].y += minor_enemies[i].dy;
     }
@@ -167,14 +176,16 @@ void main(void)
     // If the player's bullet exists...
     if (bullet_exists){
       // Check for enemy collision
-      for(i=0; i<3; i++){
-        if(major_enemies[i].is_alive && abs(bullet_player.x - major_enemies[i].x) < 8 && abs(bullet_player.y - major_enemies[i].y) < 8){
+      for(i=0; i<2; i++){
+        if(major_enemies[i].is_alive && abs(bullet_player.x - major_enemies[i].x) < 9 && abs(bullet_player.y - major_enemies[i].y) < 9){
           major_enemies[i].is_alive = false;
           bullet_exists = false;
           oam_clear();
           break;
         }
-          if(minor_enemies[i].is_alive && abs(bullet_player.x - minor_enemies[i].x) < 8 && abs(bullet_player.y - minor_enemies[i].y) < 8){
+      }
+      for(i=0; i<2; i++){
+        if(minor_enemies[i].is_alive && abs(bullet_player.x - minor_enemies[i].x) < 9 && abs(bullet_player.y - minor_enemies[i].y) < 9){
           minor_enemies[i].is_alive = false;
           bullet_exists = false;
           oam_clear();
@@ -189,12 +200,30 @@ void main(void)
       }
     }
     
+    // Check for enemy collision with player
+    // Major Enemies first
+    for(i=0; i<2; i++){
+      if(major_enemies[i].is_alive && abs(major_enemies[i].x - player.x) < 8 && abs(major_enemies[i].y - player.y) < 8){
+        player.is_alive = false;
+        oam_clear();
+      }
+    }
+    // Then Minor Enemies
+    for(i=0; i<2; i++){
+      if(minor_enemies[i].is_alive && abs(minor_enemies[i].x - player.x) < 8 && abs(minor_enemies[i].y - player.y) < 8){
+        player.is_alive = false;
+        oam_clear();
+      }
+    }
+    
     // Render actor positions
     // Major and Minor Enemies
-    for(i=0; i<4; i++){
+    for(i=0; i<2; i++){
       if(major_enemies[i].is_alive){
         oam_id = oam_meta_spr(major_enemies[i].x, major_enemies[i].y, oam_id, majorEnemy);
       }
+    }
+    for(i=0; i<2; i++){
       if(minor_enemies[i].is_alive){
         oam_id = oam_meta_spr(minor_enemies[i].x, minor_enemies[i].y, oam_id, minorEnemy);
       }
@@ -203,6 +232,15 @@ void main(void)
     if(player.is_alive){
       player.x += player.dx;
       oam_id = oam_meta_spr(player.x, player.y, oam_id, Player);
+    }
+    else{
+      // Stop all enemies when player loses.
+      for(i=0; i<2; i++){
+        major_enemies[i].dx = 0;
+        major_enemies[i].dy = 0;
+        minor_enemies[i].dx = 0;
+        minor_enemies[i].dy = 0;
+      }
     }
     // wait for next frame (sprites)
     ppu_wait_nmi();
