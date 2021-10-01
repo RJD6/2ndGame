@@ -1,5 +1,13 @@
+.export _background_pal
+.export _background_rle
 
-background:
+;;{pal:"nes",layout:"nes"};;
+_background_pal:
+ .byte $0F,$11,$25,$35,$0F,$01,$21,$30
+ .byte $0F,$1A,$11,$3C,$0F,$11,$00,$38
+;;
+;;{w:32,h:30,bpp:8,comp:"rletag",map:"nesnt"};;
+_background_rle:
 	.byte $02,$00,$02,$29,$0d,$00,$02,$0a,$0f,$00,$02,$2c,$0e,$00,$02,$05
 	.byte $80,$00,$02,$07,$90,$02,$03,$80,$80,$00,$02,$07,$90,$02,$08,$80
 	.byte $02,$02,$0d,$80,$02,$0c,$0e,$00,$02,$04,$90,$02,$02,$80,$02,$03
@@ -28,3 +36,4 @@ background:
 	.byte $0c,$cb,$fe,$fe,$3f,$cf,$ff,$37,$0c,$cc,$ff,$02,$04,$07,$00,$3c
 	.byte $7f,$ff,$ff,$57,$75,$31,$fc,$ff,$02,$04,$f3,$f0,$0f,$02,$06,$0f
 	.byte $02,$00
+ ;;

@@ -1,13 +1,9 @@
-
-//#link "titlescreen.s"
-
-//#link "titlescreen.c"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 // include NESLIB header
 #include "neslib.h"
+
 
 // include CC65 NES Header (PPU)
 #include <nes.h>
@@ -22,6 +18,12 @@
 // VRAM update buffer
 #include "vrambuf.h"
 //#link "vrambuf.c"
+extern const byte titlescreen_pal[16];
+extern const byte titlescreen_rle[];
+extern const byte background_pal[16];
+extern const byte background_rle[];
+//#link "titlescreen.s"
+//#link "background.s"
 
 struct Actor{
   char label[30]; // What kind of actor is it?
@@ -33,11 +35,40 @@ struct Actor{
   byte lives; // How many lives does it have?
 };
 
+void fade_in() {
+  byte vb;
+  for (vb=0; vb<=4; vb++) {
+    // set virtual bright value
+    pal_bright(vb);
+    // wait for 4/60 sec
+    ppu_wait_frame();
+    ppu_wait_frame();
+    ppu_wait_frame();
+    ppu_wait_frame();
+  }
+}
+
+void show_title_screen(const byte* pal, const byte* rle) {
+  // disable rendering
+  ppu_off();
+  // set palette, virtual bright to 0 (total black)
+  pal_bg(pal);
+  pal_bright(0);
+  // unpack nametable into the VRAM
+  vram_adr(0x2000);
+  vram_unrle(rle);
+  // enable rendering
+  ppu_on_all();
+  fade_in();
+}
+
+  
+
 /*{pal:"nes",layout:"nes"}*/
 const char PALETTE[32] = { 
   0x0D,			// screen color
 
-  0x1E,0x30,0x2D,0x00,	// background palette 0
+  0x14,0x24,0x34,0x00,	// background palette 0
   0x1C,0x20,0x2C,0x00,	// background palette 1
   0x00,0x10,0x20,0x00,	// background palette 2
   0x06,0x16,0x26,0x00,   // background palette 3
@@ -45,7 +76,7 @@ const char PALETTE[32] = {
   0x16,0x35,0x24,0x00,	// sprite palette 0
   0x00,0x37,0x25,0x00,	// sprite palette 1
   0x0D,0x2D,0x3A,0x00,	// sprite palette 2
-  0x0D,0x27,0x2A	// sprite palette 3
+  0x0D,0x28,0x2A	// sprite palette 3
 };
 
 // setup PPU and tables
@@ -75,7 +106,7 @@ DEF_METASPRITE_2x2(Player, 0xd8, 0); // $05; Capitalized to prevent confusion wi
 DEF_METASPRITE_2x2(bullet, 0xe4, 0); // $08
 
 void main(void)
-{
+{ 
   char i; // Actor Index
   char oam_id; // Sprite ID
   bool bullet_exists = false; // Is the player's shot currently traveling?
@@ -83,6 +114,10 @@ void main(void)
   struct Actor minor_enemies[4];
   struct Actor player;
   struct Actor bullet_player;
+  
+  show_title_screen(background_pal, background_rle);
+  show_title_screen(titlescreen_pal, titlescreen_rle); 
+while(1)
   
   // Establish Major Enemies
   for(i=0; i<2; i++){
@@ -125,7 +160,7 @@ void main(void)
   setup_graphics(); // Setup graphics
   
   // infinite loop
-  while(1) {
+  while(1) { 
     char pad = pad_poll(0);
     oam_id = 0;
     
