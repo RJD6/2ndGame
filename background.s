@@ -3,7 +3,7 @@
 
 ;;{pal:"nes",layout:"nes"};;
 _background_pal:
- .byte $0F,$11,$25,$35,$0F,$01,$21,$30
+ .byte $0F,$11,$14,$35,$0F,$01,$21,$30
  .byte $0F,$1A,$11,$3C,$0F,$11,$00,$39
 ;;
 ;;{w:32,h:30,bpp:8,comp:"rletag",map:"nesnt"};;
