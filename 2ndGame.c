@@ -130,10 +130,18 @@ void main(void)
   // Pre-Check with Enter
   // music_stop();
   
-  show_title_screen(background_pal, background_rle);
   show_title_screen(titlescreen_pal, titlescreen_rle); 
-while(1)
+  while(1){
+    char pad = pad_poll(0);
+  	if(pad & PAD_START){
+          
+          break;
+        }
+  }
   
+  
+  show_title_screen(background_pal, background_rle);
+
   // Establish Major Enemies
   for(i=0; i<2; i++){
     strcpy(major_enemies[i].label, "Major");
@@ -303,8 +311,8 @@ while(1)
       ppu_wait_nmi();
       
       // write text to name table
-      vram_adr(NTADR_A(11,11));		// set address
-      vram_write("Game Over!", 10);	// write bytes to video RAM
+     // vram_adr(NTADR_A(11,11));		// set address
+      //vram_write("Game Over!", 10);	// write bytes to video RAM
     }
     
     // wait for next frame (sprites)
