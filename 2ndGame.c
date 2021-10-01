@@ -5,6 +5,7 @@
 #include "neslib.h"
 
 
+
 // include CC65 NES Header (PPU)
 #include <nes.h>
 
@@ -24,6 +25,12 @@ extern const byte background_pal[16];
 extern const byte background_rle[];
 //#link "titlescreen.s"
 //#link "background.s"
+
+// Music Code
+void __fastcall__ famitone_update(void);
+//#link "famitone2.s"
+//#link "SpaceMania.s"
+extern char SpaceMania[];
 
 struct Actor{
   char label[30]; // What kind of actor is it?
@@ -114,6 +121,14 @@ void main(void)
   struct Actor minor_enemies[4];
   struct Actor player;
   struct Actor bullet_player;
+  
+  // Initialize Music
+  famitone_init(SpaceMania);
+  nmi_set_callback(famitone_update);
+  music_play(0);
+  
+  // Pre-Check with Enter
+  // music_stop();
   
   show_title_screen(background_pal, background_rle);
   show_title_screen(titlescreen_pal, titlescreen_rle); 
