@@ -1,3 +1,7 @@
+
+//#link "titlescreen.s"
+
+//#link "titlescreen.c"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
